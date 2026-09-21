@@ -8,11 +8,8 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 API_TOKEN = '8071350385:AAE7_FgUoz4zdnI1auiCqS9ANqR0yi6xOIs'
 ADMIN_ID = 8293930284
 
-# ==========================================
 CHANNEL_ID = '-1003174608918'
-# YAHAN APNA BILKUL NAYA BANAYA HUA LINK DALEIN 👇
-CHANNEL_LINK = 'https://t.me/+Ta3mYPpo4L02NTU1' 
-# ==========================================
+CHANNEL_LINK = 'https://t.me/+Ta3mYPpo4L02NTU1'
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -73,14 +70,12 @@ def send_help(message):
     except Exception as e:
         print(f"Help Error: {e}")
 
-# 3. Auto Approve Join Request (STRONG HANDLER)
+# 3. Auto Approve Join Request
 @bot.chat_join_request_handler()
 def approve_join_request(request):
     try:
-        # Request ko dynamically accept karna
         bot.approve_chat_join_request(request.chat.id, request.from_user.id)
         
-        # User ko instant message bhejna
         text = f"✅ Join Request Approved!\n\nWelcome to 𝗣𝗥𝗘𝗗𝗜𝗖𝗧𝗢𝗥 APP 🚀, {request.from_user.first_name}! 🎉\n\nYou are now a member of the channel.\nStay tuned for the latest updates!\n\nUse /help to see available commands."
         
         remove_kb = ReplyKeyboardRemove()
@@ -88,7 +83,7 @@ def approve_join_request(request):
     except Exception as e:
         print(f"Approve Error: {e}")
 
-# 4. Smart Broadcast System
+# 4. Smart Broadcast System (Ab ## use karega)
 @bot.message_handler(func=lambda message: message.from_user.id == ADMIN_ID)
 def admin_broadcast(message):
     if message.text.startswith('/'):
@@ -104,13 +99,18 @@ def admin_broadcast(message):
     broadcast_text = message.text
     inline_markup = None
     
-    if "||" in message.text:
-        parts = message.text.split("||")
+    # YAHAN || KI JAGAH ## KAR DIYA HAI
+    if "##" in message.text:
+        parts = message.text.split("##")
         if len(parts) >= 3:
             broadcast_text = parts[0].strip()
             btn_name = parts[1].strip()
             btn_url = parts[2].strip()
             
+            # Agar URL me https:// nahi hai, toh bot khud laga lega
+            if not btn_url.startswith("http"):
+                btn_url = "https://" + btn_url
+                
             inline_markup = InlineKeyboardMarkup()
             inline_markup.add(InlineKeyboardButton(btn_name, url=btn_url))
 
@@ -138,6 +138,4 @@ print("Bot is starting...")
 bot.remove_webhook() 
 time.sleep(1)
 keep_alive()
-
-# YAHAN MAIN CHANGE HUA HAI 👇 (Bot ko join requests sunne ki power di gayi hai)
 bot.infinity_polling(allowed_updates=['message', 'chat_join_request'])
