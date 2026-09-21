@@ -53,13 +53,11 @@ def send_welcome(message):
     save_user(user_id)
     
     if is_joined(user_id):
-        # Agar user joined hai, toh aapka purana wala pasandida welcome message
         markup = ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(KeyboardButton("Start Hack 🧩"))
         welcome_text = f"👋 <b>Welcome Back, {first_name}!</b>\n\nYou are already a member of our channel.\n\nUse /help to see available commands."
         bot.send_message(message.chat.id, welcome_text, parse_mode='html', reply_markup=markup)
     else:
-        # Naye user ke liye force sub
         remove_kb = ReplyKeyboardRemove()
         join_text = f"👋 Hello {first_name}!\n\nTo use this bot, you need to join our channel first.\n\nHow to join?\n1️⃣ Click the button below\n2️⃣ Send join request\n3️⃣ You will be automatically approved! ✅"
         bot.send_message(message.chat.id, join_text, reply_markup=remove_kb)
@@ -68,7 +66,7 @@ def send_welcome(message):
         inline_markup.add(InlineKeyboardButton("📢 Join PREDICTOR APP 🚀", url=CHANNEL_LINK))
         bot.send_message(message.chat.id, "👇 Click here:", reply_markup=inline_markup)
 
-# 2. /help command (Jo main bhool gaya tha, ab add kar diya hai)
+# 2. /help command
 @bot.message_handler(commands=['help'])
 def send_help(message):
     try:
@@ -98,7 +96,7 @@ def handle_hack_button(message):
     else:
         send_welcome(message)
 
-# 5. Smart Broadcast (Button ke sath)
+# 5. Smart Broadcast
 @bot.message_handler(func=lambda message: message.from_user.id == ADMIN_ID)
 def admin_broadcast(message):
     if message.text.startswith('/'):
@@ -145,5 +143,8 @@ def silence(message):
     pass
 
 print("Bot is starting...")
+# YAHAN SOLUTION ADD KIYA HAI 👇
+bot.remove_webhook() 
+time.sleep(1)
 keep_alive()
 bot.infinity_polling()
