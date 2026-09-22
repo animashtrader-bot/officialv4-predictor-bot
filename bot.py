@@ -5,7 +5,7 @@ from threading import Thread
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 from pymongo import MongoClient
 
-API_TOKEN = '8071350385:AAE7_FgUoz4zdnI1auiCqS9ANqR0yi6xOIs'
+API_TOKEN = '8071350385:AAHVnOVTSiSoez-Sr99NMlpHuUwbsLB8gNw'
 ADMIN_ID = 8293930284
 
 CHANNEL_ID = '-1003174608918'
