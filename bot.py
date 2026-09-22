@@ -9,7 +9,7 @@ API_TOKEN = '8071350385:AAHVnOVTSiSoez-Sr99NMlpHuUwbsLB8gNw'
 ADMIN_ID = 8293930284
 
 CHANNEL_ID = '-1003174608918'
-CHANNEL_LINK = 'https://t.me/+pFPksaKxcf1jODFl'
+CHANNEL_LINK = 'https://t.me/+Ta3mYPpo4L02NTU1'
 
 # ==========================================
 # AAPKA ASLI MONGODB LINK (Password ke sath)
