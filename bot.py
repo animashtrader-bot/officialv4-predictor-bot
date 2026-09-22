@@ -1,15 +1,25 @@
 import telebot
-import os
 import time
 from flask import Flask
 from threading import Thread
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
+from pymongo import MongoClient
 
 API_TOKEN = '8071350385:AAE7_FgUoz4zdnI1auiCqS9ANqR0yi6xOIs'
 ADMIN_ID = 8293930284
 
 CHANNEL_ID = '-1003174608918'
-CHANNEL_LINK = 'https://t.me/+Ta3mYPpo4L02NTU1'
+CHANNEL_LINK = 'https://t.me/+pFPksaKxcf1jODFl'
+
+# ==========================================
+# AAPKA ASLI MONGODB LINK (Password ke sath)
+MONGO_URL = "mongodb+srv://kisankunayak143_db_user:O5sTopknwHsTzT9L@cluster0.g8mkyvd.mongodb.net/?appName=Cluster0"
+# ==========================================
+
+# MongoDB Setup
+cluster = MongoClient(MONGO_URL)
+db = cluster["bot_database"]
+users_collection = db["users"]
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -17,7 +27,7 @@ bot = telebot.TeleBot(API_TOKEN)
 app = Flask(__name__)
 @app.route('/')
 def index():
-    return "Bot Zinda Hai aur 24/7 chal raha hai!"
+    return "Bot Zinda Hai aur Database Connected Hai!"
 
 def run():
     app.run(host="0.0.0.0", port=8080)
@@ -26,14 +36,12 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
+# User ID sidha Database me save karna (Kabhi delete nahi hogi)
 def save_user(user_id):
-    if not os.path.exists("users.txt"):
-        with open("users.txt", "w") as f: pass
-    with open("users.txt", "r+") as f:
-        users = f.read().splitlines()
-        if str(user_id) not in users:
-            f.write(str(user_id) + "\n")
+    if users_collection.count_documents({"user_id": user_id}) == 0:
+        users_collection.insert_one({"user_id": user_id})
 
+# Check karna ki user channel me hai ya nahi
 def is_joined(user_id):
     try:
         status = bot.get_chat_member(CHANNEL_ID, user_id).status
@@ -48,7 +56,7 @@ def is_joined(user_id):
 def send_welcome(message):
     user_id = message.from_user.id
     first_name = message.from_user.first_name
-    save_user(user_id)
+    save_user(user_id) # Database me gaya!
     
     remove_kb = ReplyKeyboardRemove()
     
@@ -75,31 +83,30 @@ def send_help(message):
 def approve_join_request(request):
     try:
         bot.approve_chat_join_request(request.chat.id, request.from_user.id)
-        
         text = f"✅ Join Request Approved!\n\nWelcome to 𝗣𝗥𝗘𝗗𝗜𝗖𝗧𝗢𝗥 APP 🚀, {request.from_user.first_name}! 🎉\n\nYou are now a member of the channel.\nStay tuned for the latest updates!\n\nUse /help to see available commands."
-        
         remove_kb = ReplyKeyboardRemove()
         bot.send_message(request.from_user.id, text, reply_markup=remove_kb)
     except Exception as e:
         print(f"Approve Error: {e}")
 
-# 4. Smart Broadcast System (Ab ## use karega)
+# 4. Smart Broadcast System (Database se users nikalega aur ## use karega)
 @bot.message_handler(func=lambda message: message.from_user.id == ADMIN_ID)
 def admin_broadcast(message):
     if message.text.startswith('/'):
         return
         
-    if not os.path.exists("users.txt"):
-        bot.send_message(ADMIN_ID, "❌ Koi user nahi hai.")
+    # Database se saare users uthana
+    all_users = users_collection.find()
+    total_users = users_collection.count_documents({})
+    
+    if total_users == 0:
+        bot.send_message(ADMIN_ID, "❌ Database me koi user nahi hai.")
         return
-        
-    with open("users.txt", "r") as f:
-        users = f.read().splitlines()
         
     broadcast_text = message.text
     inline_markup = None
     
-    # YAHAN || KI JAGAH ## KAR DIYA HAI
+    # Broadcast format (Message ## Button Name ## URL)
     if "##" in message.text:
         parts = message.text.split("##")
         if len(parts) >= 3:
@@ -107,7 +114,6 @@ def admin_broadcast(message):
             btn_name = parts[1].strip()
             btn_url = parts[2].strip()
             
-            # Agar URL me https:// nahi hai, toh bot khud laga lega
             if not btn_url.startswith("http"):
                 btn_url = "https://" + btn_url
                 
@@ -115,9 +121,10 @@ def admin_broadcast(message):
             inline_markup.add(InlineKeyboardButton(btn_name, url=btn_url))
 
     sent = 0
-    bot.send_message(ADMIN_ID, "⏳ Broadcasting started...")
+    bot.send_message(ADMIN_ID, f"⏳ Broadcasting started to {total_users} members...")
     
-    for user in users:
+    for user_data in all_users:
+        user = user_data["user_id"]
         if int(user) == ADMIN_ID:
             continue
         try:
@@ -127,9 +134,9 @@ def admin_broadcast(message):
         except:
             continue
             
-    bot.send_message(ADMIN_ID, f"✅ Broadcast sent to {sent} members.")
+    bot.send_message(ADMIN_ID, f"✅ Broadcast successfully sent to {sent} members.")
 
-# Baaki messages ko ignore karein
+# Baaki logo ke normal messages ignore
 @bot.message_handler(func=lambda message: message.from_user.id != ADMIN_ID)
 def silence(message):
     pass
